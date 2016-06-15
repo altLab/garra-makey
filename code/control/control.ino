@@ -51,7 +51,7 @@ void loop() {
   set_state_from_pin (BUTTON_COIN_PIN, GM_CMD_COIN, &state);
 
   comm_send (state);
-  delay (200);
+  delay (30);
 }
 
 

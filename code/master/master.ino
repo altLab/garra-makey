@@ -9,15 +9,15 @@
 // Configuration
 //
 
-const int LED_PIN = 13;
-const int MOTOR_N_PIN = 3;
-const int MOTOR_S_PIN = 4;
-const int MOTOR_E_PIN = 5;
-const int MOTOR_W_PIN = 6;
-const int CLAW_PIN = 7;
+const int LED_PIN = 3;
+const int MOTOR_N_PIN = 9;
+const int MOTOR_S_PIN = 11;
+const int MOTOR_E_PIN = 12;
+const int MOTOR_W_PIN = 10;
+const int CLAW_PIN = 13;
 const int COIN_PIN = 8;
 
-const bool GM_DEBUG = true;
+const bool GM_DEBUG = false;
 
 //
 // State
