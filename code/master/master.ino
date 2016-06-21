@@ -17,6 +17,7 @@ const int MOTOR_W_PIN = 10;
 const int CLAW_PIN = 13;
 const int COIN_PIN = 8;
 
+// Serial enabled if GM_DEBUG is false.
 const bool GM_DEBUG = false;
 
 //
@@ -47,11 +48,14 @@ void setup() {
   state.motor_w = pin_init (MOTOR_W_PIN, OUTPUT, LOW);
 
   Wire.begin (GM_MACHINE_ADDRESS);
-  Wire.onReceive (process_command);
+  Wire.onReceive (get_command);
 
+ 
   if (GM_DEBUG) {
      Serial.begin (115200);
      Serial.println("Machine Idle");
+  } else {
+  Serial.begin(19200);
   }
 }
 
@@ -61,21 +65,26 @@ void setup() {
 
 void loop() {
   delay (100);
+  if (!GM_DEBUG) {
+  serial_process_command();
+  }
 }
 
-void process_command (int num_command) {
-  byte cmd_buffer;
+void serial_process_command() {
+  if (Serial.available()) {
+	  byte cmd_buffer = Serial.read();
+	  execute_command(cmd_buffer);
+	} 
 
-  while (Wire.available()) {
-  
-    cmd_buffer = Wire.read();
-    
+}
+
+void execute_command(byte cmd_buffer) {
     if (!state.ready) {
       if (read_command (cmd_buffer, GM_CMD_READY)) {
 	      state.ready = true;
 	      update_machine();
       }
-      continue;
+      return;
     }
 
     if (GM_DEBUG) {
@@ -100,6 +109,15 @@ void process_command (int num_command) {
     
     // execute current state
     update_machine();      
+}
+
+
+void get_command (int num_command) {
+  byte cmd_buffer;
+
+  while (Wire.available()) {
+    cmd_buffer = Wire.read();
+    execute_command(cmd_buffer);
   }
 }
 
