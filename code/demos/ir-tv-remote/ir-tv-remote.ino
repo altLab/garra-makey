@@ -56,10 +56,6 @@ void loop() {
       set_state_bit (true, GM_CMD_MOVE_E, &state);
       // left 
       break;
-    
-    default
-      reset_states();
-      break;
     }
 
     My_Receiver.resume(); 
