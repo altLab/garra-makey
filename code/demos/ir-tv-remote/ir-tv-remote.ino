@@ -21,8 +21,8 @@ void setup()
 
 void loop() {
   
-  // Reset states
-  reset_states();
+  // Reset state
+  byte state = 0x00;
 
   // Check for IR commands
   if (My_Receiver.GetResults (&My_Decoder)) {
@@ -31,7 +31,6 @@ void loop() {
     My_Hash_Decoder.copyBuf (&My_Decoder);
     My_Hash_Decoder.decode();
     
-    byte state = 0x00;
     switch (My_Hash_Decoder.hash) {
 
     case 0x64d4ecee:
@@ -63,16 +62,9 @@ void loop() {
       break;
     }
 
-    comm_send (state);
     My_Receiver.resume(); 
-    delay (30);
   }
-}
 
-void reset_states(){
-  set_state_bit (false, GM_CMD_GRAB, &state);
-  set_state_bit (false, GM_CMD_MOVE_N, &state);
-  set_state_bit (false, GM_CMD_MOVE_W, &state);
-  set_state_bit (false, GM_CMD_MOVE_S, &state);
-  set_state_bit (false, GM_CMD_MOVE_E, &state);
+  comm_send (state);
+  delay (30);
 }
