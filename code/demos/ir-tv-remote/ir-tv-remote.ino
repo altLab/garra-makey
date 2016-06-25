@@ -20,6 +20,9 @@ void setup()
 }
 
 void loop() {
+  
+  // Reset states
+  reset_states();
 
   // Check for IR commands
   if (My_Receiver.GetResults (&My_Decoder)) {
@@ -42,7 +45,7 @@ void loop() {
       break;
 
     case 0xd5055bb4:
-      set_state_bit (true, GM_CMD_MOVE_E, &state);
+      set_state_bit (true, GM_CMD_MOVE_W, &state);
       break;
     
     case 0x8e623846:
@@ -51,8 +54,12 @@ void loop() {
       break;
     
     case 0x42505f87:
-      set_state_bit (true, GM_CMD_MOVE_W, &state);
+      set_state_bit (true, GM_CMD_MOVE_E, &state);
       // left 
+      break;
+    
+    default
+      reset_states();
       break;
     }
 
@@ -62,3 +69,10 @@ void loop() {
   }
 }
 
+void reset_states(){
+  set_state_bit (false, GM_CMD_GRAB, &state);
+  set_state_bit (false, GM_CMD_MOVE_N, &state);
+  set_state_bit (false, GM_CMD_MOVE_W, &state);
+  set_state_bit (false, GM_CMD_MOVE_S, &state);
+  set_state_bit (false, GM_CMD_MOVE_E, &state);
+}
