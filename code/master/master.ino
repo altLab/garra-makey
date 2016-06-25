@@ -32,7 +32,7 @@ struct {
   bool ready;
   bool claw;
   bool coin;
-} state;
+} state, previous_state;
 
 //
 // Setup
@@ -47,6 +47,8 @@ void setup() {
   state.motor_e = pin_init (MOTOR_E_PIN, OUTPUT, LOW);
   state.motor_w = pin_init (MOTOR_W_PIN, OUTPUT, LOW);
 
+  previous_state = state;
+  
   Wire.begin (GM_MACHINE_ADDRESS);
   Wire.onReceive (get_command);
 
@@ -136,13 +138,15 @@ inline bool read_command (byte command, byte mask) {
 }
 
 inline void update_machine() {
-  pin_set (LED_PIN, state.ready);
-  pin_set (COIN_PIN, state.coin);
-  pin_set (CLAW_PIN, state.claw);
-  pin_set (MOTOR_N_PIN, state.motor_n);
-  pin_set (MOTOR_S_PIN, state.motor_s);
-  pin_set (MOTOR_E_PIN, state.motor_e);
-  pin_set (MOTOR_W_PIN, state.motor_w);
+  diff_pin_set (LED_PIN, previous_state.ready, state.ready);
+  diff_pin_set (COIN_PIN, previous_state.coin, state.coin); 
+  diff_pin_set (CLAW_PIN, previous_state.claw, state.claw);
+  diff_pin_set (MOTOR_N_PIN, previous_state.motor_n, state.motor_n);
+  diff_pin_set (MOTOR_S_PIN, previous_state.motor_s, state.motor_s);
+  diff_pin_set (MOTOR_E_PIN, previous_state.motor_e, state.motor_e);
+  diff_pin_set (MOTOR_W_PIN, previous_state.motor_w, state.motor_w);
+
+  previous_state = state;
 }
 
 // Initialises digital pin number PIN with a requested MODE and
@@ -154,6 +158,8 @@ inline bool pin_init (int pin, int mode, int initial_state) {
   return (initial_state == LOW)? false : true;
 }
 
+// Set pin with number PIN to the boolean mapping corresponding to
+// STATE
 inline void pin_set (int pin, bool state) {
   if (GM_DEBUG) {
     Serial.print ("Setting pin ");
@@ -162,4 +168,11 @@ inline void pin_set (int pin, bool state) {
     Serial.println (state);
   }
   digitalWrite (pin, state ? HIGH : LOW);
+}
+
+// Set a pin only if the NEW_STATE differs from the OLD_STATE
+inline void diff_pin_set (int pin, bool old_state, bool new_state) {
+  if (old_state != new_state) {
+    pin_set (pin, new_state);
+  }
 }
