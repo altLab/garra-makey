@@ -17,15 +17,30 @@ void setup()
   byte state = 0x00;
   set_state_bit (true, GM_CMD_READY, &state);
   comm_send (state);
+  
+  // setup idle counter and idle buffer
+  icount = 0;
+  ibuffer = 30;
 }
 
 void loop() {
   
-  // Reset state
-  byte state = 0x00;
-
+  // Increase idle counter
+  icount+=1;
+  
+  // Save current state
+  savestate = state;
+  
+  if (icount >= ibuffer ) {
+    // Reset state
+    byte state = 0x00;
+  }
+  
   // Check for IR commands
   if (My_Receiver.GetResults (&My_Decoder)) {
+    
+    // command recieved so we reset idle counter
+    icount = 0;
 
     //copy the results to the hash decoder and decode them
     My_Hash_Decoder.copyBuf (&My_Decoder);
@@ -44,6 +59,7 @@ void loop() {
       break;
 
     case 0xd5055bb4:
+      // left
       set_state_bit (true, GM_CMD_MOVE_W, &state);
       break;
     
@@ -54,13 +70,17 @@ void loop() {
     
     case 0x42505f87:
       set_state_bit (true, GM_CMD_MOVE_E, &state);
-      // left 
+      // right 
       break;
     }
 
     My_Receiver.resume(); 
   }
-
-  comm_send (state);
+  
+  // Send state only if different from previous one
+  if (savestate != state) {
+    comm_send (state);
+  }
+  
   delay (30);
 }
